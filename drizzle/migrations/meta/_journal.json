@@ -1,5 +1,13 @@
 {
   "version": "7",
   "dialect": "postgresql",
-  "entries": []
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1792957150934,
+      "tag": "0000_fundacao_alcada",
+      "breakpoints": true
+    }
+  ]
 }
