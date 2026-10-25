@@ -31,7 +31,7 @@ function AuthPage() {
       email: String(f.get("email")), password: String(f.get("senha")),
     });
     setLoading(false);
-    if (error) return toast.error("Não foi possível entrar: " + error.message);
+    if (error) { toast.error("Não foi possível entrar: " + error.message); return; }
     navigate({ to: "/" });
   }
 
@@ -44,7 +44,7 @@ function AuthPage() {
       options: { emailRedirectTo: window.location.origin, data: { nome: String(f.get("nome")) } },
     });
     setLoading(false);
-    if (error) return toast.error("Não foi possível criar a conta: " + error.message);
+    if (error) { toast.error("Não foi possível criar a conta: " + error.message); return; }
     if (data.session) navigate({ to: "/" });
     else toast.success("Conta criada. Verifique seu e-mail para confirmar.");
   }
