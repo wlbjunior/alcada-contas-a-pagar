@@ -19,6 +19,7 @@ import { Route as AuthenticatedDemandasRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedFornecedoresRouteImport } from './routes/_authenticated/fornecedores'
 import { Route as AuthenticatedNovaRouteImport } from './routes/_authenticated/nova'
 import { Route as AuthenticatedObservabilidadeRouteImport } from './routes/_authenticated/observabilidade'
+import { Route as ApiIntegracaoRouteImport } from './routes/api/integracao'
 
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
@@ -73,6 +74,11 @@ const AuthenticatedObservabilidadeRoute =
     path: '/observabilidade',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const ApiIntegracaoRoute = ApiIntegracaoRouteImport.update({
+  id: '/api/integracao',
+  path: '/api/integracao',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
@@ -84,6 +90,7 @@ export interface FileRoutesByFullPath {
   '/fornecedores': typeof AuthenticatedFornecedoresRoute
   '/nova': typeof AuthenticatedNovaRoute
   '/observabilidade': typeof AuthenticatedObservabilidadeRoute
+  '/api/integracao': typeof ApiIntegracaoRoute
 }
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
@@ -94,6 +101,7 @@ export interface FileRoutesByTo {
   '/fornecedores': typeof AuthenticatedFornecedoresRoute
   '/nova': typeof AuthenticatedNovaRoute
   '/observabilidade': typeof AuthenticatedObservabilidadeRoute
+  '/api/integracao': typeof ApiIntegracaoRoute
   '/': typeof AuthenticatedIndexRoute
 }
 export interface FileRoutesById {
@@ -107,6 +115,7 @@ export interface FileRoutesById {
   '/_authenticated/fornecedores': typeof AuthenticatedFornecedoresRoute
   '/_authenticated/nova': typeof AuthenticatedNovaRoute
   '/_authenticated/observabilidade': typeof AuthenticatedObservabilidadeRoute
+  '/api/integracao': typeof ApiIntegracaoRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
 }
 export interface FileRouteTypes {
@@ -121,6 +130,7 @@ export interface FileRouteTypes {
     | '/fornecedores'
     | '/nova'
     | '/observabilidade'
+    | '/api/integracao'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/auth'
@@ -131,6 +141,7 @@ export interface FileRouteTypes {
     | '/fornecedores'
     | '/nova'
     | '/observabilidade'
+    | '/api/integracao'
     | '/'
   id:
     | '__root__'
@@ -143,12 +154,14 @@ export interface FileRouteTypes {
     | '/_authenticated/fornecedores'
     | '/_authenticated/nova'
     | '/_authenticated/observabilidade'
+    | '/api/integracao'
     | '/_authenticated/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ApiIntegracaoRoute: typeof ApiIntegracaoRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -223,6 +236,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedObservabilidadeRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/integracao': {
+      id: '/api/integracao'
+      path: '/api/integracao'
+      fullPath: '/api/integracao'
+      preLoaderRoute: typeof ApiIntegracaoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -254,6 +274,7 @@ const AuthenticatedRouteRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  ApiIntegracaoRoute: ApiIntegracaoRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
