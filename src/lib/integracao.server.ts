@@ -67,13 +67,13 @@ function intervaloMes(): { inicio: string; fim: string } {
 
 // ---------- helpers ----------
 async function registrarEvento(e: {
-  demanda_id?: string | null;
+  demanda_id?: string | null | undefined;
   etapa?: string | null;
   tipo?: string;
   mensagem: string;
   dados?: Json | null | undefined;
   origem?: string;
-  execution_id?: string | null;
+  execution_id?: string | null | undefined;
 }) {
   checar(
     await supabaseAdmin.from("eventos").insert({
