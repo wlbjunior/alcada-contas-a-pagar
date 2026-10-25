@@ -20,6 +20,7 @@ import { Route as AuthenticatedFornecedoresRouteImport } from './routes/_authent
 import { Route as AuthenticatedNovaRouteImport } from './routes/_authenticated/nova'
 import { Route as AuthenticatedObservabilidadeRouteImport } from './routes/_authenticated/observabilidade'
 import { Route as ApiIntegracaoRouteImport } from './routes/api/integracao'
+import { Route as AuthenticatedDemandasIdRouteImport } from './routes/_authenticated/demandas_.$id'
 
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
@@ -79,6 +80,11 @@ const ApiIntegracaoRoute = ApiIntegracaoRouteImport.update({
   path: '/api/integracao',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedDemandasIdRoute = AuthenticatedDemandasIdRouteImport.update({
+  id: '/demandas_/$id',
+  path: '/demandas/$id',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
@@ -91,6 +97,7 @@ export interface FileRoutesByFullPath {
   '/nova': typeof AuthenticatedNovaRoute
   '/observabilidade': typeof AuthenticatedObservabilidadeRoute
   '/api/integracao': typeof ApiIntegracaoRoute
+  '/demandas/$id': typeof AuthenticatedDemandasIdRoute
 }
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
@@ -103,6 +110,7 @@ export interface FileRoutesByTo {
   '/observabilidade': typeof AuthenticatedObservabilidadeRoute
   '/api/integracao': typeof ApiIntegracaoRoute
   '/': typeof AuthenticatedIndexRoute
+  '/demandas/$id': typeof AuthenticatedDemandasIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -117,6 +125,7 @@ export interface FileRoutesById {
   '/_authenticated/observabilidade': typeof AuthenticatedObservabilidadeRoute
   '/api/integracao': typeof ApiIntegracaoRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/_authenticated/demandas_/$id': typeof AuthenticatedDemandasIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -131,6 +140,7 @@ export interface FileRouteTypes {
     | '/nova'
     | '/observabilidade'
     | '/api/integracao'
+    | '/demandas/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/auth'
@@ -143,6 +153,7 @@ export interface FileRouteTypes {
     | '/observabilidade'
     | '/api/integracao'
     | '/'
+    | '/demandas/$id'
   id:
     | '__root__'
     | '/_authenticated'
@@ -156,6 +167,7 @@ export interface FileRouteTypes {
     | '/_authenticated/observabilidade'
     | '/api/integracao'
     | '/_authenticated/'
+    | '/_authenticated/demandas_/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -243,6 +255,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiIntegracaoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/demandas_/$id': {
+      id: '/_authenticated/demandas_/$id'
+      path: '/demandas/$id'
+      fullPath: '/demandas/$id'
+      preLoaderRoute: typeof AuthenticatedDemandasIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
@@ -255,6 +274,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedNovaRoute: typeof AuthenticatedNovaRoute
   AuthenticatedObservabilidadeRoute: typeof AuthenticatedObservabilidadeRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
+  AuthenticatedDemandasIdRoute: typeof AuthenticatedDemandasIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -266,6 +286,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedNovaRoute: AuthenticatedNovaRoute,
   AuthenticatedObservabilidadeRoute: AuthenticatedObservabilidadeRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+  AuthenticatedDemandasIdRoute: AuthenticatedDemandasIdRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
