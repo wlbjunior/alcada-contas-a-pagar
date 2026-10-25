@@ -46,10 +46,10 @@ async function dispararN8n(d: DemandaEnvio): Promise<boolean> {
   const sb = await admin();
   const s = await segredos(["n8n_webhook_url", "chave_integracao"]);
   let res: { ok: boolean; detalhe: string };
-  if (!s.n8n_webhook_url || !s.chave_integracao) {
+  if (!s['n8n_webhook_url'] || !s['chave_integracao']) {
     res = { ok: false, detalhe: "URL do webhook ou chave de integração não configurada" };
   } else {
-    res = await postar(s.n8n_webhook_url, s.chave_integracao, {
+    res = await postar(s['n8n_webhook_url'], s['chave_integracao'], {
       demanda_id: d.id,
       codigo: d.codigo,
       canal: d.canal,
@@ -179,8 +179,8 @@ export const decidirAprovacao = createServerFn({ method: "POST" })
 
     let retomado = false;
     const s = await segredos(["chave_integracao"]);
-    if (ap.resume_url && s.chave_integracao) {
-      const r = await postar(ap.resume_url, s.chave_integracao, {
+    if (ap.resume_url && s['chave_integracao']) {
+      const r = await postar(ap.resume_url, s['chave_integracao'], {
         decisao: data.decisao, justificativa: data.justificativa || null, decidido_por_nome: nome,
       });
       retomado = r.ok;
