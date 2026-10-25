@@ -18,9 +18,13 @@ class ErroIntegracao extends Error {
   }
 }
 
-function checar<T>(res: { data: T | null; error: { message: string } | null }, contexto: string): T {
+// Nota: para .maybeSingle() o valor pode ser null em tempo de execução; os chamadores verificam.
+function checar<R extends { data: unknown; error: { message: string } | null }>(
+  res: R,
+  contexto: string,
+): NonNullable<R["data"]> {
   if (res.error) throw new ErroIntegracao(500, "erro_banco", `${contexto}: ${res.error.message}`);
-  return res.data as T;
+  return res.data as NonNullable<R["data"]>;
 }
 
 const sha = (v: string) => createHash("sha256").update(v, "utf8").digest();
