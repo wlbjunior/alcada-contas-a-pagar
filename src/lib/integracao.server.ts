@@ -18,9 +18,9 @@ class ErroIntegracao extends Error {
   }
 }
 
-function checar<T>(res: { data: T; error: { message: string } | null }, contexto: string): T {
+function checar<T>(res: { data: T | null; error: { message: string } | null }, contexto: string): T {
   if (res.error) throw new ErroIntegracao(500, "erro_banco", `${contexto}: ${res.error.message}`);
-  return res.data;
+  return res.data as T;
 }
 
 const sha = (v: string) => createHash("sha256").update(v, "utf8").digest();
@@ -54,7 +54,7 @@ function somarDias(iso: string, dias: number): string {
   return d.toISOString().slice(0, 10);
 }
 function intervaloMes(): { inicio: string; fim: string } {
-  const [y, m] = hojeFortaleza().split("-").map(Number);
+  const [y = 1970, m = 1] = hojeFortaleza().split("-").map(Number);
   const inicio = `${y}-${String(m).padStart(2, "0")}-01`;
   const ny = m === 12 ? y + 1 : y;
   const nm = m === 12 ? 1 : m + 1;
