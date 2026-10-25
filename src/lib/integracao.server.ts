@@ -71,7 +71,7 @@ async function registrarEvento(e: {
   etapa?: string | null;
   tipo?: string;
   mensagem: string;
-  dados?: Json | null;
+  dados?: Json | null | undefined;
   origem?: string;
   execution_id?: string | null;
 }) {
@@ -325,7 +325,7 @@ const acoes: { [A in Acao]: (d: Dados<A>) => Promise<Resultado> } = {
 
   async evento(d) {
     if (d.demanda_id) await buscarDemanda(d.demanda_id);
-    await registrarEvento(d);
+    await registrarEvento({ ...d, dados: d.dados ?? null });
     return ok();
   },
 
