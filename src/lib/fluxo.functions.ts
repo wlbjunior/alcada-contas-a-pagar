@@ -146,14 +146,15 @@ export const decidirAprovacao = createServerFn({ method: "POST" })
     const sb = await admin();
     const { data: ap } = await sb
       .from("aprovacoes")
-      .select("id, status, prazo, resume_url, demanda_id, demandas(criado_por, codigo)")
+      .select("id, status, prazo, resume_url, demanda_id, demandas(criado_por, codigo, canal)")
       .eq("id", data.aprovacao_id)
       .maybeSingle();
     if (!ap) throw new Error("Aprovação não encontrada");
     if (ap.status !== "pendente") throw new Error("Esta aprovação não está mais pendente");
     if (ap.prazo && new Date(ap.prazo).getTime() < Date.now()) throw new Error("O prazo desta aprovação expirou");
-    const dem = ap.demandas as unknown as { criado_por: string | null; codigo: string } | null;
+    const dem = ap.demandas as unknown as { criado_por: string | null; codigo: string; canal: string } | null;
     if (dem?.criado_por === context.userId) throw new Error("Quem lançou a demanda não pode aprová-la");
+    if (dem?.canal === "app" && dem.criado_por === null) throw new Error("Demanda de app sem autor não pode ser decidida");
 
     const { data: perfil } = await sb.from("profiles").select("nome, email").eq("id", context.userId).maybeSingle();
     const nome = perfil?.nome || perfil?.email || (context.claims as any)?.email || "gestor";
@@ -198,4 +199,38 @@ export const decidirAprovacao = createServerFn({ method: "POST" })
       });
     }
     return { ok: true, status: novo, retomado };
+  });
+
+export const reprocessarRetomada = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ aprovacao_id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    if (!(await ehGestor(context.supabase, context.userId))) throw new Error("Só gestores podem reprocessar retomadas");
+    const sb = await admin();
+    const { data: ap, error: erroAprovacao } = await sb.from("aprovacoes")
+      .select("id, status, demanda_id, resume_url, justificativa, decidido_por_nome, demandas(status)")
+      .eq("id", data.aprovacao_id).maybeSingle();
+    if (erroAprovacao) throw new Error("Não foi possível consultar a aprovação");
+    if (!ap) throw new Error("Aprovação não encontrada");
+    if (ap.status !== "aprovada" && ap.status !== "rejeitada") throw new Error("A aprovação precisa estar decidida");
+    const dem = ap.demandas as unknown as { status: string } | null;
+    if (!dem || (dem.status !== "aprovada" && dem.status !== "rejeitada")) throw new Error("A demanda não aguarda retomada");
+    const { data: pagamentos, error: erroPagamento } = await sb.from("pagamentos")
+      .select("id").eq("demanda_id", ap.demanda_id).limit(1);
+    if (erroPagamento) throw new Error("Não foi possível verificar o pagamento");
+    if (pagamentos?.length) throw new Error("Esta demanda já tem pagamento registrado");
+    const s = await segredos(["chave_integracao"]);
+    if (!ap.resume_url || !s['chave_integracao']) throw new Error("Retomada não configurada");
+    const r = await postar(ap.resume_url, s['chave_integracao'], {
+      decisao: ap.status === "aprovada" ? "aprovar" : "rejeitar",
+      justificativa: ap.justificativa,
+      decidido_por_nome: ap.decidido_por_nome,
+    });
+    const { error: erroEvento } = await sb.from("eventos").insert({
+      demanda_id: ap.demanda_id, origem: "app", tipo: r.ok ? "info" : "erro", etapa: "retomada",
+      mensagem: r.ok ? "Retomada reprocessada" : "Decisão gravada, mas o n8n não confirmou a retomada",
+      dados: { aprovacao_id: ap.id, detalhe: r.detalhe },
+    });
+    if (erroEvento) throw new Error("Retomada tentada, mas não foi possível registrar o evento de auditoria");
+    return { ok: true, retomado: r.ok };
   });
