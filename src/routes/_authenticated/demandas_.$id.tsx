@@ -10,7 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { reenviarDemanda } from "@/lib/fluxo.functions";
+import { reenviarDemanda, reprocessarRetomada } from "@/lib/fluxo.functions";
 import { brl, dataBR, dataHoraBR, rotaRotulo, statusInfo, CHECAGENS, valorChecagem } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/demandas_/$id")({
@@ -20,6 +20,8 @@ export const Route = createFileRoute("/_authenticated/demandas_/$id")({
       { name: "description", content: "Detalhes, checagens e linha do tempo da demanda." },
       { property: "og:title", content: "Demanda — Alçada" },
       { property: "og:description", content: "Detalhes, checagens e linha do tempo da demanda." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: DemandaDetalhe,
@@ -57,6 +59,8 @@ function DemandaDetalhe() {
   const [textoAberto, setTextoAberto] = useState(false);
   const [reenviando, setReenviando] = useState(false);
   const reenviar = useServerFn(reenviarDemanda);
+  const [reprocessando, setReprocessando] = useState(false);
+  const reprocessar = useServerFn(reprocessarRetomada);
 
   const { data: eu } = useQuery({
     queryKey: ["meus-papeis-det"],
@@ -132,10 +136,31 @@ function DemandaDetalhe() {
     }
   }
 
+  async function reprocessarAgora() {
+    if (!aprovacao) return;
+    setReprocessando(true);
+    try {
+      const r = await reprocessar({ data: { aprovacao_id: aprovacao.id } });
+      if (r.retomado) toast.success("Retomada reprocessada.");
+      else toast.warning("O n8n não confirmou a retomada.");
+      await Promise.all([
+        qc.invalidateQueries({ queryKey: ["demanda", id] }),
+        qc.invalidateQueries({ queryKey: ["demanda-eventos", id] }),
+        qc.invalidateQueries({ queryKey: ["demanda-pagamento", id] }),
+      ]);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Falha ao reprocessar retomada.");
+    } finally {
+      setReprocessando(false);
+    }
+  }
+
   if (isLoading) return <div className="p-6 text-sm text-muted-foreground">Carregando…</div>;
   if (!demanda) return <div className="p-6 text-sm text-muted-foreground">Demanda não encontrada. <Link to="/demandas" search={{ status: "", rota: "", q: "" }} className="underline">Voltar</Link></div>;
 
   const st = statusInfo(demanda.status);
+  const podeReprocessar = gestor && demanda.status === "aprovada" && !pagamento && aprovacao?.status === "aprovada"
+    && eventos.some((ev) => ev.mensagem === "Decisão gravada, mas o n8n não confirmou a retomada");
   const confiancaPct = demanda.confianca != null ? Math.round(demanda.confianca * 100) : null;
   const extracao = (demanda.extracao && typeof demanda.extracao === "object" ? demanda.extracao : {}) as Record<string, unknown>;
 
@@ -152,6 +177,11 @@ function DemandaDetalhe() {
           {demanda.status === "erro" && gestor && (
             <Button size="sm" variant="outline" className="ml-auto" disabled={reenviando} onClick={reenviarAgora}>
               <RotateCcw /> {reenviando ? "Reenviando…" : "Reenviar ao orquestrador"}
+            </Button>
+          )}
+          {podeReprocessar && (
+            <Button size="sm" variant="outline" disabled={reprocessando} onClick={reprocessarAgora}>
+              <RotateCcw /> {reprocessando ? "Reprocessando…" : "Reprocessar retomada"}
             </Button>
           )}
         </div>
