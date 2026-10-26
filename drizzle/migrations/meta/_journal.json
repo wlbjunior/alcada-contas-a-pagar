@@ -8,6 +8,13 @@
       "when": 1792957150934,
       "tag": "0000_fundacao_alcada",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1792986637155,
+      "tag": "0001_endurecer_auditoria_segregacao",
+      "breakpoints": true
     }
   ]
 }
