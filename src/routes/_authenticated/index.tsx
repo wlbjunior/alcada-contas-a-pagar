@@ -30,7 +30,7 @@ function Kpi({ rotulo, valor, sub }: { rotulo: string; valor: string; sub?: stri
   return (
     <div className="rounded-md border bg-card p-4">
       <div className="text-xs text-muted-foreground">{rotulo}</div>
-      <div className="mt-1 text-2xl font-semibold num">{valor}</div>
+      <div className="mt-1 truncate text-xl font-semibold num" title={valor}>{valor}</div>
       {sub && <div className="mt-0.5 text-xs text-muted-foreground">{sub}</div>}
     </div>
   );
