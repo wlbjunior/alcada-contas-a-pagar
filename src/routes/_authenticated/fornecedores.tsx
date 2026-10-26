@@ -130,8 +130,8 @@ function Fornecedores() {
                   </td>
                   {gestor && (
                     <td className="px-3 py-2 text-right">
-                      <Button variant="ghost" size="icon-sm" onClick={() => abrir(f)} aria-label="Editar"><Pencil /></Button>
-                      <Button variant="ghost" size="icon-sm" onClick={() => remover(f)} aria-label="Excluir"><Trash2 /></Button>
+                      <Button variant="ghost" size="icon" onClick={() => abrir(f)} aria-label="Editar"><Pencil /></Button>
+                      <Button variant="ghost" size="icon" onClick={() => remover(f)} aria-label="Excluir"><Trash2 /></Button>
                     </td>
                   )}
                 </tr>

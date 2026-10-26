@@ -9,9 +9,9 @@ import { brl, dataBR, dataHoraBR, rotaRotulo, statusInfo, STATUS, ROTAS } from "
 
 export const Route = createFileRoute("/_authenticated/demandas")({
   validateSearch: (s: Record<string, unknown>) => ({
-    status: typeof s.status === "string" ? s.status : "",
-    rota: typeof s.rota === "string" ? s.rota : "",
-    q: typeof s.q === "string" ? s.q : "",
+    status: typeof s["status"] === "string" ? s["status"] : "",
+    rota: typeof s["rota"] === "string" ? s["rota"] : "",
+    q: typeof s["q"] === "string" ? s["q"] : "",
   }),
   head: () => ({
     meta: [

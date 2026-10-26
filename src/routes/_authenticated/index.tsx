@@ -96,7 +96,8 @@ function Painel() {
       for (const d of demandas) {
         const rotuloDia = new Intl.DateTimeFormat("pt-BR", { timeZone: FUSO, day: "2-digit", month: "2-digit" }).format(new Date(d.criado_em));
         const i = idx.get(rotuloDia);
-        if (i != null) dias[i].quantidade += 1;
+        const dia = i != null ? dias[i] : undefined;
+        if (dia) dia.quantidade += 1;
       }
 
       const agora = Date.now();

@@ -155,8 +155,8 @@ function CentrosCusto() {
                     <td className={`px-3 py-2 text-right num ${disp < 0 ? "text-destructive" : ""}`}>{brl(disp)}</td>
                     {gestor && (
                       <td className="px-3 py-2 text-right">
-                        <Button variant="ghost" size="icon-sm" onClick={() => abrir(c)} aria-label="Editar"><Pencil /></Button>
-                        <Button variant="ghost" size="icon-sm" onClick={() => remover(c)} aria-label="Excluir"><Trash2 /></Button>
+                        <Button variant="ghost" size="icon" onClick={() => abrir(c)} aria-label="Editar"><Pencil /></Button>
+                        <Button variant="ghost" size="icon" onClick={() => remover(c)} aria-label="Excluir"><Trash2 /></Button>
                       </td>
                     )}
                   </tr>

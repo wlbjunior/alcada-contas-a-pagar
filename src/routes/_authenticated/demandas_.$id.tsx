@@ -24,7 +24,7 @@ export const Route = createFileRoute("/_authenticated/demandas_/$id")({
   }),
   component: DemandaDetalhe,
   notFoundComponent: () => (
-    <div className="p-6 text-sm text-muted-foreground">Demanda não encontrada. <Link to="/demandas" className="underline">Voltar</Link></div>
+    <div className="p-6 text-sm text-muted-foreground">Demanda não encontrada. <Link to="/demandas" search={{ status: "", rota: "", q: "" }} className="underline">Voltar</Link></div>
   ),
 });
 
@@ -133,7 +133,7 @@ function DemandaDetalhe() {
   }
 
   if (isLoading) return <div className="p-6 text-sm text-muted-foreground">Carregando…</div>;
-  if (!demanda) return <div className="p-6 text-sm text-muted-foreground">Demanda não encontrada. <Link to="/demandas" className="underline">Voltar</Link></div>;
+  if (!demanda) return <div className="p-6 text-sm text-muted-foreground">Demanda não encontrada. <Link to="/demandas" search={{ status: "", rota: "", q: "" }} className="underline">Voltar</Link></div>;
 
   const st = statusInfo(demanda.status);
   const confiancaPct = demanda.confianca != null ? Math.round(demanda.confianca * 100) : null;
@@ -142,7 +142,7 @@ function DemandaDetalhe() {
   return (
     <div>
       <div className="border-b bg-card px-6 py-5">
-        <Link to="/demandas" className="mb-2 inline-flex items-center gap-1 text-xs text-muted-foreground hover:underline">
+        <Link to="/demandas" search={{ status: "", rota: "", q: "" }} className="mb-2 inline-flex items-center gap-1 text-xs text-muted-foreground hover:underline">
           <ArrowLeft className="h-3 w-3" /> Demandas
         </Link>
         <div className="flex flex-wrap items-center gap-3">

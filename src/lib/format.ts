@@ -80,7 +80,7 @@ export function valorChecagem(checagens: unknown, chave: string): { ok: boolean 
   if (typeof v === "boolean") return { ok: v, detalhe: null };
   if (v && typeof v === "object") {
     const o = v as Record<string, unknown>;
-    const ok = "ok" in o ? Boolean(o.ok) : null;
+    const ok = "ok" in o ? Boolean(o["ok"]) : null;
     const detalhe = def?.detalhe ? def.detalhe(o) : null;
     return { ok, detalhe };
   }
@@ -107,5 +107,5 @@ export function cnpjValido(cnpj: string): boolean {
   };
   const d1 = dig(d.slice(0, 12), [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]);
   const d2 = dig(d.slice(0, 13), [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]);
-  return d1 === Number(d[12]) && d2 === Number(d[13]);
+  return d1 === Number(d.charAt(12)) && d2 === Number(d.charAt(13));
 }
