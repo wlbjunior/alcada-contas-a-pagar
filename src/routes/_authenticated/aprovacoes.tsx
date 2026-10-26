@@ -31,18 +31,10 @@ const dataBR = (s: string | null) =>
 const dataHoraBR = (s: string | null) =>
   s ? new Date(s).toLocaleString("pt-BR", { timeZone: "America/Fortaleza", dateStyle: "short", timeStyle: "short" }) : "—";
 
-const CHECAGENS: [string, string][] = [
-  ["receita", "Receita"], ["cadastro", "Cadastro"], ["homologado", "Homologado"],
-  ["duplicidade", "Duplicidade"], ["orcamento", "Orçamento"], ["alcada", "Alçada"],
+const CHECAGENS_RESUMO: [string, string][] = [
+  ["receita_consultada", "Receita"], ["fornecedor_cadastrado", "Cadastro"], ["fornecedor_homologado", "Homologado"],
+  ["sem_duplicidade", "Duplicidade"], ["orcamento_ok", "Orçamento"], ["dentro_do_limite", "Alçada"],
 ];
-
-function valorChecagem(c: unknown, k: string): boolean | null {
-  if (!c || typeof c !== "object") return null;
-  const v = (c as Record<string, unknown>)[k];
-  if (typeof v === "boolean") return v;
-  if (v && typeof v === "object" && "ok" in v) return Boolean((v as { ok: unknown }).ok);
-  return null;
-}
 
 function prazoRestante(prazo: string | null, agora: number) {
   if (!prazo) return "sem prazo";
@@ -174,11 +166,11 @@ function Aprovacoes() {
                       </div>
                     )}
                     <div className="flex flex-wrap gap-2">
-                      {CHECAGENS.map(([k, rot]) => {
-                        const v = valorChecagem(d?.checagens, k);
+                      {CHECAGENS_RESUMO.map(([k, rot]) => {
+                        const { ok } = valorChecagem(d?.checagens, k);
                         return (
-                          <Badge key={k} variant={v === false ? "destructive" : "secondary"} className="gap-1 font-normal">
-                            {v === true ? <Check className="h-3 w-3" /> : v === false ? <X className="h-3 w-3" /> : "·"} {rot}
+                          <Badge key={k} variant={ok === false ? "destructive" : "secondary"} className="gap-1 font-normal">
+                            {ok === true ? <Check className="h-3 w-3" /> : ok === false ? <X className="h-3 w-3" /> : "·"} {rot}
                           </Badge>
                         );
                       })}
