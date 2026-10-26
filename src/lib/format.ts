@@ -31,8 +31,9 @@ export const ROTAS: Record<string, string> = {
 
 export const rotaRotulo = (r: string | null | undefined) => (r ? (ROTAS[r] ?? r) : "—");
 
-// Checagens do jsonb `checagens`: cada valor pode ser booleano ou { ok, ...detalhes }
-export type Checagem = { chave: string; rotulo: string; detalhe?: (v: Record<string, unknown>) => string | null };
+// Checagens do jsonb `checagens` gravado pelo n8n: chaves planas, booleanas,
+// com detalhes em chaves irmãs (ex.: receita_razao_social, limite, orcamento{}).
+export type Checagem = { chave: string; rotulo: string; detalhe?: (tudo: Record<string, unknown>) => string | null };
 
 const txt = (v: Record<string, unknown>, ...ks: string[]) => {
   for (const k of ks) {
@@ -44,47 +45,48 @@ const txt = (v: Record<string, unknown>, ...ks: string[]) => {
 };
 
 export const CHECAGENS: Checagem[] = [
-  { chave: "ia", rotulo: "IA respondeu" },
-  { chave: "obrigatorios", rotulo: "Campos obrigatórios" },
-  { chave: "confianca", rotulo: "Confiança mínima", detalhe: (v) => txt(v, "confianca", "valor") },
-  { chave: "cnpj_valido", rotulo: "CNPJ válido" },
-  { chave: "receita", rotulo: "Consulta à Receita Federal", detalhe: (v) => txt(v, "razao_social", "razao_social_oficial") },
-  { chave: "cnpj_ativo", rotulo: "CNPJ ativo", detalhe: (v) => txt(v, "situacao") },
-  { chave: "nome_confere", rotulo: "Nome confere com a Receita" },
-  { chave: "cadastro", rotulo: "Fornecedor cadastrado" },
-  { chave: "homologado", rotulo: "Homologado" },
+  { chave: "ia_respondeu", rotulo: "IA respondeu" },
+  { chave: "campos_obrigatorios", rotulo: "Campos obrigatórios" },
+  { chave: "confianca_ok", rotulo: "Confiança mínima" },
+  { chave: "cnpj_digitos_ok", rotulo: "CNPJ válido" },
+  { chave: "receita_consultada", rotulo: "Consulta à Receita Federal", detalhe: (t) => txt(t, "receita_razao_social") },
+  { chave: "receita_ativa", rotulo: "CNPJ ativo" },
+  { chave: "nome_confere_receita", rotulo: "Nome confere com a Receita" },
+  { chave: "fornecedor_cadastrado", rotulo: "Fornecedor cadastrado" },
+  { chave: "fornecedor_homologado", rotulo: "Homologado" },
   {
-    chave: "duplicidade",
+    chave: "sem_duplicidade",
     rotulo: "Sem duplicidade",
-    detalhe: (v) => {
-      const c = v["codigos"];
-      return Array.isArray(c) && c.length ? `códigos: ${c.join(", ")}` : txt(v, "codigo");
+    detalhe: (t) => {
+      const c = t["duplicidades"];
+      return Array.isArray(c) && c.length ? `códigos: ${c.join(", ")}` : null;
     },
   },
-  { chave: "alcada", rotulo: "Dentro da alçada", detalhe: (v) => txt(v, "limite") && `limite ${brl(Number(v["limite"]))}` },
+  { chave: "dentro_do_limite", rotulo: "Dentro da alçada", detalhe: (t) => (t["limite"] != null ? `limite ${brl(Number(t["limite"]))}` : null) },
   {
-    chave: "orcamento",
+    chave: "orcamento_ok",
     rotulo: "Orçamento do centro",
-    detalhe: (v) => {
-      const m = v["mensal"], c = v["comprometido"];
-      return m != null || c != null ? `mensal ${brl(Number(m ?? 0))} · comprometido ${brl(Number(c ?? 0))}` : null;
+    detalhe: (t) => {
+      const o = t["orcamento"];
+      if (!o || typeof o !== "object") return null;
+      const r = o as Record<string, unknown>;
+      const centro = typeof r["centro"] === "string" ? `${r["centro"]} · ` : "";
+      return `${centro}mensal ${brl(Number(r["mensal"] ?? 0))} · comprometido ${brl(Number(r["comprometido"] ?? 0))}`;
     },
   },
-  { chave: "vencimento", rotulo: "Vencimento", detalhe: (v) => txt(v, "vencimento", "data") },
+  { chave: "vencimento_ok", rotulo: "Vencimento", detalhe: (t) => (t["vencimento_dias"] != null ? `${t["vencimento_dias"]} dias` : null) },
 ];
 
 export function valorChecagem(checagens: unknown, chave: string): { ok: boolean | null; detalhe: string | null } {
   if (!checagens || typeof checagens !== "object") return { ok: null, detalhe: null };
-  const v = (checagens as Record<string, unknown>)[chave];
+  const tudo = checagens as Record<string, unknown>;
+  const v = tudo[chave];
   const def = CHECAGENS.find((c) => c.chave === chave);
-  if (typeof v === "boolean") return { ok: v, detalhe: null };
-  if (v && typeof v === "object") {
-    const o = v as Record<string, unknown>;
-    const ok = "ok" in o ? Boolean(o["ok"]) : null;
-    const detalhe = def?.detalhe ? def.detalhe(o) : null;
-    return { ok, detalhe };
-  }
-  return { ok: null, detalhe: null };
+  const detalhe = def?.detalhe ? def.detalhe(tudo) : null;
+  if (typeof v === "boolean") return { ok: v, detalhe };
+  if (v && typeof v === "object" && "ok" in (v as Record<string, unknown>))
+    return { ok: Boolean((v as Record<string, unknown>)["ok"]), detalhe };
+  return { ok: null, detalhe };
 }
 
 // CNPJ: máscara e validação de dígitos verificadores
