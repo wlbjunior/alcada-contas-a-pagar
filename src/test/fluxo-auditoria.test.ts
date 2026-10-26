@@ -6,7 +6,7 @@ vi.mock("@tanstack/react-start", () => ({
     const builder = {
       middleware: () => builder,
       inputValidator: (fn: typeof validate) => { validate = fn; return builder; },
-      handler: (fn: (input: unknown) => unknown) => (input: { data: unknown; context: unknown }) =>
+      handler: (fn: (input: unknown) => unknown) => async (input: { data: unknown; context: unknown }) =>
         fn({ ...input, data: validate(input.data) }),
     };
     return builder;
