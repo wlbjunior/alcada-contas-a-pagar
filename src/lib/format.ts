@@ -101,7 +101,7 @@ export function cnpjValido(cnpj: string): boolean {
   const d = cnpj.replace(/\D/g, "");
   if (d.length !== 14 || /^(\d)\1{13}$/.test(d)) return false;
   const dig = (base: string, pesos: number[]) => {
-    const soma = base.split("").reduce((acc, n, i) => acc + Number(n) * pesos[i], 0);
+    const soma = base.split("").reduce((acc, n, i) => acc + Number(n) * (pesos[i] ?? 0), 0);
     const resto = soma % 11;
     return resto < 2 ? 0 : 11 - resto;
   };
